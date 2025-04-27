@@ -30,6 +30,8 @@ func New(input string) *Lexer {
 // readChar advances the lexer one rune at a time.
 func (l *Lexer) readChar() {
 	if l.ReadPosition >= len(l.Input) {
+		l.Position = l.ReadPosition
+		l.ReadPosition++
 		l.Ch = 0 // EOF
 		return
 	}
