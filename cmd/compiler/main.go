@@ -1,21 +1,16 @@
 package main
 
 import (
-    "fmt"
-    "compiler/lexer"
-    "compiler/parser"
-    "compiler/codegen"
-	  "github.com/go-llvm/llvm/bindings/go/llvm"
+	"compiler/lexer"
+	"compiler/parser"
+	"fmt"
 )
 
 func main() {
-    source := "varName = 3"
-    l := lexer.New(source)
-    p := parser.New(l)
-    prog := p.ParseProgram()  // *ast.Program
+	source := "varName = 3"
+	l := lexer.New(source)
+	p := parser.New(l)
 
-    cg := codegen.New("my_module")
-    mod := cg.Generate(prog)
-
-    fmt.Println(mod.String())  // print the LLVM IR
+	prog := p.ParseProgram()
+	fmt.Printf("prog: %v\n", prog)
 }

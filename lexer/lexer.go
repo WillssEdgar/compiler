@@ -1,20 +1,20 @@
 package lexer
 
 import (
+	"compiler/token"
+	"fmt"
 	"unicode/utf8"
 )
 
-// Lexer represents the lexical analyzer.
 type Lexer struct {
-	Input        string // the input string
-	Position     int    // start of current rune
-	ReadPosition int    // next reading position in bytes
-	Ch           rune   // current rune
-	Line         int    // current line number
-	Column       int    // current column number
+	Input        string `json:"Input"`
+	Position     int    `json:"Position"`
+	ReadPosition int    `json:"ReadPosition"`
+	Ch           rune   `json:"Ch"`
+	Line         int    `json:"Line"`
+	Column       int    `json:"Column"`
 }
 
-// New returns a new Lexer instance for a given input.
 func New(input string) *Lexer {
 	l := &Lexer{
 		Input:        input,
@@ -27,12 +27,11 @@ func New(input string) *Lexer {
 	return l
 }
 
-// readChar advances the lexer one rune at a time.
 func (l *Lexer) readChar() {
 	if l.ReadPosition >= len(l.Input) {
 		l.Position = l.ReadPosition
 		l.ReadPosition++
-		l.Ch = 0 // EOF
+		l.Ch = 0
 		return
 	}
 	var width int
@@ -48,7 +47,6 @@ func (l *Lexer) readChar() {
 	}
 }
 
-// peekChar returns the next rune without advancing.
 func (l *Lexer) peekChar() rune {
 	if l.ReadPosition >= len(l.Input) {
 		return 0
@@ -57,19 +55,16 @@ func (l *Lexer) peekChar() rune {
 	return ch
 }
 
-// isLetter checks if a rune is a letter or underscore.
 func isLetter(ch rune) bool {
 	return ('a' <= ch && ch <= 'z') ||
 		('A' <= ch && ch <= 'Z') ||
 		ch == '_'
 }
 
-// isDigit checks if a rune is a digit.
 func isDigit(ch rune) bool {
 	return '0' <= ch && ch <= '9'
 }
 
-// readIdentifier reads a full identifier.
 func (l *Lexer) readIdentifier() string {
 	start := l.Position
 	for isLetter(l.Ch) || isDigit(l.Ch) {
@@ -78,7 +73,6 @@ func (l *Lexer) readIdentifier() string {
 	return l.Input[start:l.Position]
 }
 
-// readNumber reads a number token.
 func (l *Lexer) readNumber() string {
 	start := l.Position
 	for isDigit(l.Ch) {
@@ -87,25 +81,22 @@ func (l *Lexer) readNumber() string {
 	return l.Input[start:l.Position]
 }
 
-// lookupIdentifier classifies an identifier.
-func lookupIdentifier(ident string) TokenType {
-	keywords := map[string]TokenType{
-		"if":     TokenKeyword,
-		"else":   TokenKeyword,
-		"for":    TokenKeyword,
-		"func":   TokenKeyword,
-		"return": TokenKeyword,
+func lookupIdentifier(ident string) token.TokenType {
+	keywords := map[string]token.TokenType{
+		"if":     token.TokenKeyword,
+		"else":   token.TokenKeyword,
+		"for":    token.TokenKeyword,
+		"func":   token.TokenKeyword,
+		"return": token.TokenKeyword,
 	}
 	if typ, ok := keywords[ident]; ok {
 		return typ
 	}
-	return TokenIdentifier
+	return token.TokenIdentifier
 }
 
-// NextToken returns the next token from input.
-func (l *Lexer) NextToken() Token {
-	var tok Token
-	// Skip whitespace
+func (l *Lexer) NextToken() token.Token {
+	var tok token.Token
 	for l.Ch == ' ' || l.Ch == '\t' || l.Ch == '\r' || l.Ch == '\n' {
 		l.readChar()
 	}
@@ -120,29 +111,39 @@ func (l *Lexer) NextToken() Token {
 		return tok
 	} else if isDigit(l.Ch) {
 		tok.Lexeme = l.readNumber()
-		tok.Type = TokenNumber
+		tok.Type = token.TokenNumber
 		return tok
 	}
 
-	// Process operators and single character tokens.
 	switch l.Ch {
 	case '=':
 		if l.peekChar() == '=' {
 			ch := l.Ch
 			l.readChar()
 			tok.Lexeme = string(ch) + string(l.Ch)
-			tok.Type = TokenOperator
+			tok.Type = token.TokenOperator
 		} else {
-			tok.Type = TokenOperator
+			tok.Type = token.TokenOperator
 			tok.Lexeme = string(l.Ch)
 		}
 	case 0:
-		tok.Type = TokenEOF
+		tok.Type = token.TokenEOF
 		tok.Lexeme = ""
 	default:
-		tok.Type = TokenIdentifier
+		tok.Type = token.TokenIdentifier
 		tok.Lexeme = string(l.Ch)
 	}
 	l.readChar()
 	return tok
+}
+
+func (l *Lexer) PrintLexer() {
+	fmt.Printf("{\n\tInput: %s\n\tPosition: %d\n\tReadPosition: %d\n\tCh: %c\n\tLine: %d\n\tColumn: %d\n}\n",
+		l.Input,
+		l.Position,
+		l.ReadPosition,
+		l.Ch,
+		l.Line,
+		l.Column,
+	)
 }
