@@ -119,7 +119,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '=':
 		if l.peekChar() == '=' {
 			ch := l.Ch
+			println("before: ")
+			l.PrintLexer()
 			l.readChar()
+			println("after: ")
 			tok.Lexeme = string(ch) + string(l.Ch)
 			tok.Type = token.TokenOperator
 		} else {

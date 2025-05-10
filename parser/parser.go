@@ -19,8 +19,11 @@ func New(l *lexer.Lexer) *Parser {
 	p := &Parser{
 		L: l,
 	}
+	p.PrintParser()
 	p.nextToken()
+	p.PrintParser()
 	p.nextToken()
+	p.PrintParser()
 	return p
 }
 
@@ -42,7 +45,6 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
-	p.PrintParser()
 	switch p.CurToken.Type {
 	case token.TokenIdentifier:
 		if p.PeekToken.Lexeme == "=" {
@@ -58,6 +60,7 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 	}
 	p.nextToken()
 	p.nextToken()
+	p.PrintParser()
 	if p.CurToken.Type == token.TokenNumber {
 		val, _ := strconv.ParseInt(p.CurToken.Lexeme, 10, 64)
 		stmt.Value = &ast.IntegerLiteral{Value: val}

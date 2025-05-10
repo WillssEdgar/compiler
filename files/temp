@@ -1,0 +1,93 @@
+
+Parser: {
+ 	"l": {
+ 		"Input": "varName = 3",
+ 		"Position": 0,
+ 		"ReadPosition": 1,
+ 		"Ch": 118,
+ 		"Line": 1,
+ 		"Column": 1
+ 	},
+ 	"curToken": {
+ 		"tokentype": 0,
+ 		"lexeme": "",
+ 		"line": 0,
+ 		"column": 0
+ 	},
+ 	"peekToken": {
+ 		"tokentype": 0,
+ 		"lexeme": "",
+ 		"line": 0,
+ 		"column": 0
+ 	}
+ }
+
+Parser: {
+ 	"l": {
+ 		"Input": "varName = 3",
+ 		"Position": 7,
+ 		"ReadPosition": 8,
+ 		"Ch": 32,
+ 		"Line": 1,
+ 		"Column": 8
+ 	},
+ 	"curToken": {
+ 		"tokentype": 0,
+ 		"lexeme": "",
+ 		"line": 0,
+ 		"column": 0
+ 	},
+ 	"peekToken": {
+ 		"tokentype": 1,
+ 		"lexeme": "varName",
+ 		"line": 1,
+ 		"column": 1
+ 	}
+ }
+
+Parser: {
+ 	"l": {
+ 		"Input": "varName = 3",
+ 		"Position": 9,
+ 		"ReadPosition": 10,
+ 		"Ch": 32,
+ 		"Line": 1,
+ 		"Column": 10
+ 	},
+ 	"curToken": {
+ 		"tokentype": 1,
+ 		"lexeme": "varName",
+ 		"line": 1,
+ 		"column": 1
+ 	},
+ 	"peekToken": {
+ 		"tokentype": 3,
+ 		"lexeme": "=",
+ 		"line": 1,
+ 		"column": 9
+ 	}
+ }
+
+Parser: {
+ 	"l": {
+ 		"Input": "varName = 3",
+ 		"Position": 12,
+ 		"ReadPosition": 13,
+ 		"Ch": 0,
+ 		"Line": 1,
+ 		"Column": 11
+ 	},
+ 	"curToken": {
+ 		"tokentype": 2,
+ 		"lexeme": "3",
+ 		"line": 1,
+ 		"column": 11
+ 	},
+ 	"peekToken": {
+ 		"tokentype": 0,
+ 		"lexeme": "",
+ 		"line": 1,
+ 		"column": 11
+ 	}
+ }
+prog: varName = 3
