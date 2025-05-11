@@ -83,6 +83,7 @@ func (l *Lexer) readNumber() string {
 
 func lookupIdentifier(ident string) token.TokenType {
 	keywords := map[string]token.TokenType{
+		"let":    token.TokenKeyword,
 		"if":     token.TokenKeyword,
 		"else":   token.TokenKeyword,
 		"for":    token.TokenKeyword,
@@ -119,16 +120,16 @@ func (l *Lexer) NextToken() token.Token {
 	case '=':
 		if l.peekChar() == '=' {
 			ch := l.Ch
-			println("before: ")
-			l.PrintLexer()
 			l.readChar()
-			println("after: ")
 			tok.Lexeme = string(ch) + string(l.Ch)
 			tok.Type = token.TokenOperator
 		} else {
 			tok.Type = token.TokenOperator
 			tok.Lexeme = string(l.Ch)
 		}
+	case '+':
+		tok.Type = token.TokenOperator
+		tok.Lexeme = string(l.Ch)
 	case 0:
 		tok.Type = token.TokenEOF
 		tok.Lexeme = ""

@@ -1,5 +1,10 @@
 package token
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type TokenType int
 
 const (
@@ -26,3 +31,8 @@ const (
 	KeywordFunc
 	KeywordReturn
 )
+
+func (t *Token) PrintToken() {
+	jsonPrint, _ := json.MarshalIndent(t, " ", "	")
+	fmt.Printf("Token: %s", jsonPrint)
+}

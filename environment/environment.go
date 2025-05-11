@@ -1,34 +1,21 @@
 package environment
 
-type Node struct {
-	Program    Program
-	Statement  Statement
-	Expression Expression
+import "compiler/object"
+
+type Environment struct {
+	store map[string]object.Object
 }
 
-type Program struct {
-	statements []Statement
+func NewEnvironment() *Environment {
+	return &Environment{store: make(map[string]object.Object)}
 }
 
-type Statement struct {
-	Let        LetStatement
-	Expression ExpressionStatement
+func (e *Environment) Get(name string) (object.Object, bool) {
+	val, ok := e.store[name]
+	return val, ok
 }
 
-type LetStatement struct {
-	name  Identifier
-	value Expression
-}
-
-type Identifier struct {
-	value string
-}
-
-type Expression struct {
-	Identifier     Identifier
-	IntegerLiteral uint
-}
-
-type ExpressionStatement struct {
-	expression Expression
+func (e *Environment) Set(name string, val object.Object) object.Object {
+	e.store[name] = val
+	return val
 }

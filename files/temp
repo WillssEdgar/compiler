@@ -1,93 +1,74 @@
 
 Parser: {
  	"l": {
- 		"Input": "varName = 3",
- 		"Position": 0,
- 		"ReadPosition": 1,
- 		"Ch": 118,
- 		"Line": 1,
- 		"Column": 1
- 	},
- 	"curToken": {
- 		"tokentype": 0,
- 		"lexeme": "",
- 		"line": 0,
- 		"column": 0
- 	},
- 	"peekToken": {
- 		"tokentype": 0,
- 		"lexeme": "",
- 		"line": 0,
- 		"column": 0
- 	}
- }
-
-Parser: {
- 	"l": {
- 		"Input": "varName = 3",
- 		"Position": 7,
- 		"ReadPosition": 8,
+ 		"Input": "let varName = 3 + 3;",
+ 		"Position": 17,
+ 		"ReadPosition": 18,
  		"Ch": 32,
  		"Line": 1,
- 		"Column": 8
- 	},
- 	"curToken": {
- 		"tokentype": 0,
- 		"lexeme": "",
- 		"line": 0,
- 		"column": 0
- 	},
- 	"peekToken": {
- 		"tokentype": 1,
- 		"lexeme": "varName",
- 		"line": 1,
- 		"column": 1
- 	}
- }
-
-Parser: {
- 	"l": {
- 		"Input": "varName = 3",
- 		"Position": 9,
- 		"ReadPosition": 10,
- 		"Ch": 32,
- 		"Line": 1,
- 		"Column": 10
- 	},
- 	"curToken": {
- 		"tokentype": 1,
- 		"lexeme": "varName",
- 		"line": 1,
- 		"column": 1
- 	},
- 	"peekToken": {
- 		"tokentype": 3,
- 		"lexeme": "=",
- 		"line": 1,
- 		"column": 9
- 	}
- }
-
-Parser: {
- 	"l": {
- 		"Input": "varName = 3",
- 		"Position": 12,
- 		"ReadPosition": 13,
- 		"Ch": 0,
- 		"Line": 1,
- 		"Column": 11
+ 		"Column": 18
  	},
  	"curToken": {
  		"tokentype": 2,
  		"lexeme": "3",
  		"line": 1,
- 		"column": 11
+ 		"column": 15
  	},
  	"peekToken": {
- 		"tokentype": 0,
- 		"lexeme": "",
+ 		"tokentype": 3,
+ 		"lexeme": "+",
  		"line": 1,
- 		"column": 11
+ 		"column": 17
  	}
  }
-prog: varName = 3
+Token: {
+ 	"tokentype": 3,
+ 	"lexeme": "+",
+ 	"line": 1,
+ 	"column": 17
+ }
+Parser: {
+ 	"l": {
+ 		"Input": "let varName = 3 + 3;",
+ 		"Position": 20,
+ 		"ReadPosition": 21,
+ 		"Ch": 0,
+ 		"Line": 1,
+ 		"Column": 20
+ 	},
+ 	"curToken": {
+ 		"tokentype": 2,
+ 		"lexeme": "3",
+ 		"line": 1,
+ 		"column": 19
+ 	},
+ 	"peekToken": {
+ 		"tokentype": 1,
+ 		"lexeme": ";",
+ 		"line": 1,
+ 		"column": 20
+ 	}
+ }
+prog: &ast.Program{Statements:[]ast.Statement{(*ast.LetStatement)(0xc00009e048)}}
+program: {
+ 	"Statements": [
+ 		{
+ 			"Assignment": {
+ 				"Name": {
+ 					"Value": "varName"
+ 				},
+ 				"Value": {
+ 					"Left": {
+ 						"Value": 3
+ 					},
+ 					"Operator": "+",
+ 					"Right": {
+ 						"Value": 3
+ 					}
+ 				}
+ 			}
+ 		}
+ 	]
+ }
+Result: 6
+varName = 6
