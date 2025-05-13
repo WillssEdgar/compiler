@@ -10,14 +10,19 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 func main() {
-	file, err := os.Open("../../files/main.blue")
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("could not get cwd: %v", err)
+	}
+	path := filepath.Join(wd, "files", "main.blue")
+	file, err := os.Open(path)
 	if err != nil {
 		log.Fatalf("Error: %s", err)
 	}
-	// source := "let varName = 3 + 3;"
 
 	defer file.Close()
 
