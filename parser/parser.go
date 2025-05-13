@@ -155,8 +155,6 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 	p.nextToken()
 	p.nextToken()
 
-	p.PrintParser()
-
 	value := p.parseExpression(LOWEST)
 
 	if p.PeekToken.Lexeme == ";" {
@@ -170,13 +168,10 @@ func (p *Parser) parseAssignmentStatement() *ast.AssignmentStatement {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
-	println("i am in identifier")
 	return &ast.Identifier{Value: p.CurToken.Lexeme}
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
-	println("i am in integer literal")
-	p.PrintParser()
 	lit := &ast.IntegerLiteral{}
 	val, err := strconv.ParseInt(p.CurToken.Lexeme, 10, 64)
 	if err != nil {
