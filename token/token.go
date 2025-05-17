@@ -13,6 +13,12 @@ const (
 	TokenNumber
 	TokenOperator
 	TokenKeyword
+	TokenLParen
+	TokenRParen
+	TokenLBrace
+	TokenRBrace
+	TokenSemicolon
+	TokenComma
 )
 
 type Token struct {

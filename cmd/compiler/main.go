@@ -1,51 +1,48 @@
 package main
 
 import (
-	"bufio"
-	"compiler/environment"
-	"compiler/evaluator"
-	"compiler/lexer"
-	"compiler/parser"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+
+	"compiler/environment"
+	"compiler/evaluator"
+	"compiler/lexer"
+	"compiler/parser"
 )
 
 func main() {
+	// 1) Locate your source file
 	wd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("could not get cwd: %v", err)
+		log.Fatalf("could not get working directory: %v", err)
 	}
 	path := filepath.Join(wd, "files", "main.blue")
-	file, err := os.Open(path)
+
+	// 2) Read it all in one shot
+	data, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatalf("Error: %s", err)
+		log.Fatalf("failed to read %s: %v", path, err)
 	}
+	source := string(data)
 
-	defer file.Close()
+	// 3) Lex + parse
+	l := lexer.New(source)
+	p := parser.New(l)
+	program := p.ParseProgram()
 
-	scanner := bufio.NewScanner(file)
+	// (Optional) dump the AST for debugging
+	astJSON, _ := json.MarshalIndent(program, "", "  ")
+	fmt.Printf("AST:\n%s\n", astJSON)
 
-	for scanner.Scan() {
-		source := scanner.Text()
-		l := lexer.New(source)
-		p := parser.New(l)
-
-		prog := p.ParseProgram()
-		parsedprogram, _ := json.MarshalIndent(prog, " ", "	")
-		fmt.Printf("program: %s", parsedprogram)
-		env := environment.NewEnvironment()
-		result := evaluator.Eval(prog, env)
-
-		fmt.Printf("\nResult: %s\n", result.Inspect())
-
-		if val, ok := env.Get("varName"); ok {
-			fmt.Printf("varName = %s\n", val.Inspect())
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatalf("Error: %s", err)
+	// 4) Evaluate in a fresh environment
+	env := environment.NewEnvironment()
+	result := evaluator.Eval(program, env)
+	if result != nil {
+		fmt.Printf("Result: %s\n", result.Inspect())
+	} else {
+		fmt.Println("Result: <nil>")
 	}
 }

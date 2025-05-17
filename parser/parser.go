@@ -71,6 +71,7 @@ func (p *Parser) nextToken() {
 
 func (p *Parser) ParseProgram() *ast.Program {
 	program := &ast.Program{}
+	fmt.Printf("lexeme: %s", p.CurToken.Lexeme)
 	for p.CurToken.Type != token.TokenEOF {
 		stmt := p.parseStatement()
 		if stmt != nil {
@@ -88,9 +89,18 @@ func (p *Parser) parseStatement() ast.Statement {
 			return p.parseAssignmentStatement()
 		}
 	case token.TokenKeyword:
-		if p.CurToken.Lexeme == "let" {
+		switch p.CurToken.Lexeme {
+		case "let":
 			return p.parseLetStatement()
+		case "return":
+			println("i am in return")
+			return p.parseReturnStatement()
+		case "func":
+			return p.parseFunctionDeclaration()
 		}
+	case token.TokenRBrace:
+		print("help i am here")
+		return nil
 	}
 	return nil
 }
@@ -116,6 +126,86 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	}
 }
 
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.CurToken}
+	p.nextToken() // move past 'return'
+	stmt.ReturnValue = p.parseExpression(LOWEST)
+	if p.PeekToken.Lexeme == ";" {
+		p.nextToken()
+	}
+	return stmt
+}
+
+func (p *Parser) parseFunctionDeclaration() *ast.FunctionalLiteral {
+	fl := &ast.FunctionalLiteral{Token: p.CurToken}
+
+	p.nextToken()
+	fl.ReturnType = p.CurToken.Lexeme
+
+	p.nextToken()
+	fl.FunctionName = &ast.Identifier{Value: p.CurToken.Lexeme}
+
+	if !p.expectPeek(token.TokenLParen) {
+		return nil
+	}
+	fl.Parameters = p.parseFunctionParameters()
+
+	if !p.expectPeek(token.TokenLBrace) {
+		return nil
+	}
+	fl.Body = p.parseBlockStatement()
+
+	return fl
+}
+
+func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+	identifiers := []*ast.Identifier{}
+	p.nextToken()
+	if p.CurToken.Type == token.TokenRParen {
+		return identifiers
+	}
+
+	for {
+		ident := &ast.Identifier{Value: p.CurToken.Lexeme}
+		identifiers = append(identifiers, ident)
+		if p.PeekToken.Type != token.TokenComma {
+			break
+		}
+		p.nextToken() // ,
+		p.nextToken() // next identifier
+	}
+
+	if !p.expectPeek(token.TokenRParen) {
+		return nil
+	}
+	return identifiers
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	bs := &ast.BlockStatement{Token: p.CurToken}
+	bs.Statements = []ast.Statement{}
+
+	p.nextToken() // consume '{'
+
+	for p.CurToken.Type != token.TokenRBrace && p.CurToken.Type != token.TokenEOF {
+		stmt := p.parseStatement()
+		if stmt != nil {
+			bs.Statements = append(bs.Statements, stmt)
+		}
+		p.nextToken()
+	}
+	return bs
+}
+
+// helper to check & advance
+func (p *Parser) expectPeek(t token.TokenType) bool {
+	if p.PeekToken.Type == t {
+		p.nextToken()
+		return true
+	}
+	return false
+}
+
 func (p *Parser) parseExpression(precedence int) ast.Expression {
 	prefix := p.prefixParseFns[p.CurToken.Type]
 	if prefix == nil {
@@ -124,7 +214,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	leftExp := prefix()
 
 	for p.PeekToken.Lexeme != ";" && precedence < p.peekPrecedence() {
-		p.PeekToken.PrintToken()
+		// p.PeekToken.PrintToken()
 		infix := p.infixParseFns[p.PeekToken.Type]
 		if infix == nil {
 			return leftExp

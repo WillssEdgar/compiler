@@ -83,12 +83,14 @@ func (l *Lexer) readNumber() string {
 
 func lookupIdentifier(ident string) token.TokenType {
 	keywords := map[string]token.TokenType{
-		"let":    token.TokenKeyword,
-		"if":     token.TokenKeyword,
-		"else":   token.TokenKeyword,
-		"for":    token.TokenKeyword,
-		"func":   token.TokenKeyword,
-		"return": token.TokenKeyword,
+		"let":     token.TokenKeyword,
+		"if":      token.TokenKeyword,
+		"else":    token.TokenKeyword,
+		"for":     token.TokenKeyword,
+		"func":    token.TokenKeyword,
+		"return":  token.TokenKeyword,
+		"Integer": token.TokenKeyword,
+		"String":  token.TokenKeyword,
 	}
 	if typ, ok := keywords[ident]; ok {
 		return typ
@@ -129,6 +131,24 @@ func (l *Lexer) NextToken() token.Token {
 		}
 	case '+':
 		tok.Type = token.TokenOperator
+		tok.Lexeme = string(l.Ch)
+	case '{':
+		tok.Type = token.TokenLBrace
+		tok.Lexeme = "{"
+	case '}':
+		tok.Type = token.TokenRBrace
+		tok.Lexeme = "}"
+	case '(':
+		tok.Type = token.TokenLParen
+		tok.Lexeme = "("
+	case ')':
+		tok.Type = token.TokenRParen
+		tok.Lexeme = ")"
+	case ';':
+		tok.Type = token.TokenSemicolon
+		tok.Lexeme = string(l.Ch)
+	case ',':
+		tok.Type = token.TokenComma
 		tok.Lexeme = string(l.Ch)
 	case 0:
 		tok.Type = token.TokenEOF

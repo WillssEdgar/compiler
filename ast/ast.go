@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"compiler/token"
 	"fmt"
 )
 
@@ -40,9 +41,6 @@ func (p *Program) String() string {
 	return out.String()
 }
 
-// ==================== Statements ====================
-
-// LetStatement wraps an AssignmentStatement so you get a dedicated "let" node.
 type LetStatement struct {
 	Assignment AssignmentStatement
 }
@@ -53,7 +51,6 @@ func (ls *LetStatement) String() string {
 	return fmt.Sprintf("let %s;", ls.Assignment.String())
 }
 
-// AssignmentStatement holds <identifier> = <expression>
 type AssignmentStatement struct {
 	Name  *Identifier
 	Value Expression
@@ -65,10 +62,8 @@ func (as *AssignmentStatement) String() string {
 	return fmt.Sprintf("%s = %s", as.Name.String(), as.Value.String())
 }
 
-// ==================== Expressions ====================
-
-// Identifier is a variable name.
 type Identifier struct {
+	Token token.Token
 	Value string
 }
 
@@ -117,6 +112,99 @@ func (ie *InfixExpression) String() string {
 	out.WriteString(ie.Left.String())
 	out.WriteString(" " + ie.Operator + " ")
 	out.WriteString(ie.Right.String())
+	out.WriteString(")")
+	return out.String()
+}
+
+type FunctionStatement struct {
+	Literal *FunctionalLiteral
+}
+
+func (fs *FunctionStatement) statementNode()       {}
+func (fs *FunctionStatement) TokenLiteral() string { return fs.Literal.Token.Lexeme }
+func (fs *FunctionStatement) String() string       { return fs.Literal.String() }
+
+type FunctionalLiteral struct {
+	Token        token.Token
+	ReturnType   string
+	FunctionName *Identifier
+	Parameters   []*Identifier
+	Body         *BlockStatement
+}
+
+func (fl *FunctionalLiteral) statementNode()       {}
+func (fl *FunctionalLiteral) TokenLiteral() string { return fl.Token.Lexeme }
+func (fl *FunctionalLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("func ")
+	out.WriteString(fl.ReturnType)
+	out.WriteString(" ")
+	out.WriteString(fl.FunctionName.String())
+	out.WriteString("(")
+	for i, p := range fl.Parameters {
+		if i > 0 {
+			out.WriteString(", ")
+		}
+		out.WriteString(p.String())
+	}
+	out.WriteString(") ")
+	out.WriteString(fl.Body.String())
+	return out.String()
+}
+
+type BlockStatement struct {
+	Token      token.Token
+	Statements []Statement
+}
+
+func (bs *BlockStatement) expressionNode()      {}
+func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Lexeme }
+func (bs *BlockStatement) String() string {
+	var out bytes.Buffer
+	out.WriteString("{\n")
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+		out.WriteString("\n")
+	}
+	out.WriteString("}")
+	return out.String()
+}
+
+type ReturnStatement struct {
+	Token       token.Token
+	ReturnValue Expression
+}
+
+func (rs *ReturnStatement) statementNode()       {}
+func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Lexeme }
+func (rs *ReturnStatement) String() string {
+	return fmt.Sprintf("return %s;", rs.ReturnValue.String())
+}
+
+type CallExpression struct {
+	Token     token.Token // the '(' token
+	Function  Expression  // Identifier or FunctionLiteral
+	Arguments []Expression
+}
+
+func (ce *CallExpression) expressionNode()      {}
+func (ce *CallExpression) TokenLiteral() string { return ce.Token.Lexeme }
+
+func (ce *CallExpression) String() string {
+	var out bytes.Buffer
+
+	// function name or literal
+	out.WriteString(ce.Function.String())
+	out.WriteString("(")
+
+	// each argument, comma-separated
+	for i, arg := range ce.Arguments {
+		if i > 0 {
+			out.WriteString(", ")
+		}
+		out.WriteString(arg.String())
+	}
+
 	out.WriteString(")")
 	return out.String()
 }

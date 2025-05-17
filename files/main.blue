@@ -1,1 +1,3 @@
-let varName = 3 + 3;
+func Integer name() {
+	return 0;
+}

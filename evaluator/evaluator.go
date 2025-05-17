@@ -1,4 +1,3 @@
-// compiler/evaluator/evaluator.go
 package evaluator
 
 import (
@@ -6,10 +5,10 @@ import (
 
 	"compiler/ast"
 	"compiler/environment"
-	"compiler/object"
 )
 
-func Eval(node ast.Node, env *environment.Environment) object.Object {
+func Eval(node ast.Node, env *environment.Environment) environment.Object {
+	fmt.Printf("node: %v", node)
 	switch node := node.(type) {
 
 	case *ast.Program:
@@ -32,7 +31,7 @@ func Eval(node ast.Node, env *environment.Environment) object.Object {
 		return val
 
 	case *ast.IntegerLiteral:
-		return &object.Integer{Value: node.Value}
+		return &environment.Integer{Value: node.Value}
 
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
@@ -54,71 +53,106 @@ func Eval(node ast.Node, env *environment.Environment) object.Object {
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+
+	case *ast.FunctionalLiteral:
+		return &environment.Function{Literal: node, Env: env}
+
+	case *ast.CallExpression:
+		function := Eval(node.Function, env)
+		args := []environment.Object{}
+		for _, a := range node.Arguments {
+			args = append(args, Eval(a, env))
+		}
+		return applyFunction(function, args...)
+	case *ast.ReturnStatement:
+		val := Eval(node.ReturnValue, env)
+		return &environment.ReturnValue{Value: val}
 	}
 
+	print("yeah")
 	return nil
 }
 
-func evalProgram(program *ast.Program, env *environment.Environment) object.Object {
-	var result object.Object
+func applyFunction(fn environment.Object, args ...environment.Object) environment.Object {
+	function, ok := fn.(*environment.Function)
+	if !ok {
+		return newError("not a function: %s", fn.Type())
+	}
+
+	extendedEnv := environment.NewEnclosedEnvironment(function.Env)
+
+	for i, param := range function.Literal.Parameters {
+		extendedEnv.Set(param.Value, args[i])
+	}
+
+	evaluated := Eval(function.Literal.Body, extendedEnv)
+
+	if returnValue, ok := evaluated.(*environment.ReturnValue); ok {
+		return returnValue.Value
+	}
+	return evaluated
+}
+
+func evalProgram(program *ast.Program, env *environment.Environment) environment.Object {
+	var result environment.Object
 	for _, stmt := range program.Statements {
 		result = Eval(stmt, env)
 	}
 	return result
 }
 
-func evalPrefixExpression(operator string, right object.Object) object.Object {
+func evalPrefixExpression(operator string, right environment.Object) environment.Object {
 	switch operator {
 	case "-":
-		if right.Type() != object.INTEGER_OBJ {
+		if right.Type() != environment.INTEGER_OBJ {
 			return newError("unknown operator: -%s", right.Type())
 		}
-		val := right.(*object.Integer).Value
-		return &object.Integer{Value: -val}
+		val := right.(*environment.Integer).Value
+		return &environment.Integer{Value: -val}
 	default:
 		return newError("unknown operator: %s%s", operator, right.Type())
 	}
 }
 
-func evalInfixExpression(operator string, left, right object.Object) object.Object {
-	if left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ {
+func evalInfixExpression(operator string, left, right environment.Object) environment.Object {
+	if left.Type() == environment.INTEGER_OBJ && right.Type() == environment.INTEGER_OBJ {
 		return evalIntegerInfixExpression(operator, left, right)
 	}
 	return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
 }
 
-func evalIntegerInfixExpression(operator string, left, right object.Object) object.Object {
-	l := left.(*object.Integer).Value
-	r := right.(*object.Integer).Value
+func evalIntegerInfixExpression(operator string, left, right environment.Object) environment.Object {
+	l := left.(*environment.Integer).Value
+	r := right.(*environment.Integer).Value
 
 	switch operator {
 	case "+":
-		return &object.Integer{Value: l + r}
+		return &environment.Integer{Value: l + r}
 	case "-":
-		return &object.Integer{Value: l - r}
+		return &environment.Integer{Value: l - r}
 	case "*":
-		return &object.Integer{Value: l * r}
+		return &environment.Integer{Value: l * r}
 	case "/":
-		return &object.Integer{Value: l / r}
+		return &environment.Integer{Value: l / r}
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
 }
 
-func evalIdentifier(node *ast.Identifier, env *environment.Environment) object.Object {
+func evalIdentifier(node *ast.Identifier, env *environment.Environment) environment.Object {
 	if val, ok := env.Get(node.Value); ok {
 		return val
 	}
 	return newError("identifier not found: %s", node.Value)
 }
 
-func newError(format string, a ...interface{}) *object.Error {
-	return &object.Error{Message: fmt.Sprintf(format, a...)}
+func newError(format string, a ...interface{}) *environment.Error {
+	return &environment.Error{Message: fmt.Sprintf(format, a...)}
 }
 
-func isError(obj object.Object) bool {
+func isError(obj environment.Object) bool {
 	if obj != nil {
-		return obj.Type() == object.ERROR_OBJ
+		return obj.Type() == environment.ERROR_OBJ
 	}
 	return false
 }
